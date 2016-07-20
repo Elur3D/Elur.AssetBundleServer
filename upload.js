@@ -6,12 +6,15 @@ var multer  = require('multer'),
 var dir = 'assetbundles';
 var all = path.join('.', dir, 'all');
 
-fs.ensureDirSync(all);
-
 module.exports = multer.diskStorage({
 
   destination: function (req, file, cb) {
-    cb(null, all);
+
+    var dir = path.join(all, req.asset.platform);
+
+    fs.ensureDir(dir, () =>
+      cb(null, dir)
+    );
   },
 
   filename: function (req, file, cb) {
@@ -21,9 +24,9 @@ module.exports = multer.diskStorage({
     var extension = path.extname(filename).toLowerCase();
     var finalname = filename + req.asset.hash;
 
-    var builddir  = path.join('.', dir, req.asset.build);
-    var linksrc   = path.join(builddir, filename);
-    var linkdst   = path.join('..', 'all', finalname);
+    var builddir  = path.join('.', dir, req.asset.build, req.asset.platform);
+    var linkdst   = path.join(builddir, filename);
+    var linksrc   = path.join('..', '..', 'all', req.asset.platform, finalname);
 
     var asset = req.asset || {};
 
@@ -37,9 +40,15 @@ module.exports = multer.diskStorage({
       linkdst   : linkdst,
     });
 
-    fs.ensureDir(builddir, function(err) {
-      fs.ensureLink(linksrc, "linkdst", function(err) {});
-    });
+    fs.ensureDir(builddir, () =>
+      fs.symlink(linksrc, linkdst, 'file', (err) => {
+        if (err)
+          fs.remove(linkdst, () =>
+            fs.symlink(linksrc, linkdst, 'file', () => {})
+          )
+        }
+      )
+    );
 
     cb(null, finalname);
   }

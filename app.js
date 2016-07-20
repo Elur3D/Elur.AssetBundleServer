@@ -11,16 +11,17 @@ app.get('/', function(req, res){
 
 app.use('/', function (req, res, next) {
   req.asset = _.extend({
-    build: "development",
+    build: 'development',
     hash: 0,
+    platform: 'OSX',
   }, _.pick(req.body, ['build', 'hash']));
   next();
 });
 
 app.post('/', multer({storage: upload}).any(), function(req, res) {
-    console.log(req.body) // form fields
-    console.log(req.files) // form files
-    console.log(req.asset);
+    console.log('req', req.body) // form fields
+    console.log('files', req.files) // form files
+    console.log('asset', req.asset);
     res.status(204).end()
 });
 
