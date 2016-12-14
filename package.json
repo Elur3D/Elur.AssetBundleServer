@@ -1,5 +1,5 @@
 {
-  "name": "asssetbundlemerge",
+  "name": "AssetBundleUploadServer",
   "version": "1.0.0",
   "description": "Keep a single version of each asset bundle for several builds",
   "main": "app.js",
@@ -9,9 +9,13 @@
     "lodash": "^4.13.1",
     "multer": "^1.1.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp": "^3.7.0",
+    "gulp-nodemon": "^2.1.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
   },
   "author": "",
   "license": "ISC"
