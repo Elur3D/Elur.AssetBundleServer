@@ -3,14 +3,32 @@ var multer  = require('multer'),
     fs      = require('fs-extra'),
     _       = require('lodash');
 
-var dir = 'assetbundles';
-var all = path.join('.', dir, 'all');
+var securityRE = /[^A-Za-z0-9.\/_-]/ig;
+var securityRE2= /\.\./ig;
+var slashRE = /\//ig;
+
+var exportPath = 'assetbundles';
 
 module.exports = multer.diskStorage({
 
   destination: function (req, file, cb) {
 
-    var dir = path.join(all, req.asset.platform);
+    req.asset = _.extend({
+      build: 'development',
+      hash: 0,
+      platform: 'OSX',
+    }, _.pick(req.body, ['build', 'hash', 'platform', 'assetbundle']));
+
+    // Get filename and apply a security normalization over the filename
+    req.filename = req.asset.assetbundle || file.originalname;
+    req.filename = path.normalize(req.filename.replace(securityRE, '').replace(securityRE2, '')).toLowerCase();
+
+    var dir;
+
+    if (req.asset.hash)
+      dir = path.join('.', exportPath, req.asset.platform, 'all');
+    else
+      dir = path.join('.', exportPath, req.asset.platform, req.asset.build, path.dirname(req.filename));
 
     fs.ensureDir(dir, () =>
       cb(null, dir)
@@ -19,37 +37,43 @@ module.exports = multer.diskStorage({
 
   filename: function (req, file, cb) {
 
-    var filename  = file.originalname;
-    var basename  = path.basename(filename);
-    var extension = path.extname(filename).toLowerCase();
-    var finalname = filename + req.asset.hash;
+    var filename = req.filename;
 
-    var builddir  = path.join('.', dir, req.asset.build, req.asset.platform);
-    var linkdst   = path.join(builddir, filename);
-    var linksrc   = path.join('..', '..', 'all', req.asset.platform, finalname);
+    if (req.asset.hash) {
 
-    var asset = req.asset || {};
+      // Cache file flatterns the path and appends the hash
+      var cachename = filename.replace(slashRE, "-") + '_' + req.asset.hash;
 
-    _.extend(asset, {
-      filename  : filename,
-      basename  : basename,
-      extension : extension,
-      finalname : finalname,
-      builddir  : builddir,
-      linksrc   : linksrc,
-      linkdst   : linkdst,
-    });
+      var cachepath = path.join('.', exportPath, req.asset.platform, 'all', cachename);
+      var linkdst   = path.join('.', exportPath, req.asset.platform, req.asset.build, filename);
+      var linksrc   = path.relative(path.dirname(linkdst), cachepath);
 
-    fs.ensureDir(builddir, () =>
-      fs.symlink(linksrc, linkdst, 'file', (err) => {
-        if (err)
-          fs.remove(linkdst, () =>
-            fs.symlink(linksrc, linkdst, 'file', () => {})
-          )
-        }
-      )
-    );
+      var asset = req.asset || {};
 
-    cb(null, finalname);
+      _.extend(asset, {
+        file      : filename,
+        linkdst   : linkdst,
+        linksrc   : linksrc,
+        cachepath : cachepath,
+        cachename : cachename,
+      });
+
+      fs.ensureDir(path.dirname(linkdst), () =>
+        fs.symlink(linksrc, linkdst, 'file', (err) => {
+          if (err)
+            fs.remove(linksrc, () =>
+              fs.symlink(linksrc, linkdst, 'file', () => {})
+            )
+          }
+        )
+      );
+
+      cb(null, cachename);
+
+    } else {
+
+      cb(null, path.basename(filename));
+
+    }
   }
 });
