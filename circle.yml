@@ -9,7 +9,7 @@ dependencies:
     - docker info
     - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
     - docker pull "$DOCKERHUB:latest"
-    - docker build --rm=false -t "$DOCKERHUB" .
+    - docker build --rm=false -t "$DOCKERHUB" src
 
 test:
   override:
