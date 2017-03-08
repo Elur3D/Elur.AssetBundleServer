@@ -1,0 +1,23 @@
+machine:
+  services:
+    - docker
+  environment:
+    DOCKERHUB: "jonanh/assetbundleserver"
+
+dependencies:
+  override:
+    - docker info
+    - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+    - docker pull "$DOCKERHUB:latest"
+    - docker build --rm=false -t "$DOCKERHUB" .
+
+deployment:
+  hub:
+    branch: master
+    commands:
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker tag -f "$DOCKERHUB" "$DOCKERHUB:$CIRCLE_BUILD_NUM"
+      - docker push "$DOCKERHUB:$CIRCLE_BUILD_NUM"
+      - docker tag -f "$DOCKERHUB" "$DOCKERHUB:latest"
+      - docker push "$DOCKERHUB:latest"
+
