@@ -11,6 +11,10 @@ dependencies:
     - docker pull "$DOCKERHUB:latest"
     - docker build --rm=false -t "$DOCKERHUB" .
 
+test:
+  override:
+    - echo "Tests disabled by now"
+
 deployment:
   hub:
     branch: master
