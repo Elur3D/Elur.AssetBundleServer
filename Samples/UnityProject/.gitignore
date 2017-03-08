@@ -1,0 +1,76 @@
+# =============== #
+# Unity generated #
+# =============== #
+Temp/
+Obj/
+UnityGenerated/
+/Library/
+
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+ExportedObj/
+*.svd
+*.userprefs
+*.csproj
+*.pidb
+*.suo
+*.sln
+*.user
+*.unityproj
+*.booproj
+
+# ============ #
+# OS generated #
+# ============ #
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+.vscode
+
+
+
+### Xcode ###
+# Xcode
+#
+# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+
+## Build generated
+build/
+DerivedData/
+
+## Various settings
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+
+/AssetBundles
+Resources/LocalAssetBundleServerURL.bytes
+Resources/LocalAssetBundleServerURL.bytes.meta
+Assets/StreamingAssets/AssetBundles/
+Assets/StreamingAssets/AssetBundles.meta
+
+
+## Other
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+## Compiled Object files
+server/src/**/*.slo
+server/src/**/*.lo
+server/src/**/*.o
+server/src/**/*.obj
+
