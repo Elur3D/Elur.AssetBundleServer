@@ -10,6 +10,24 @@ namespace Elurnity.AssetBundles
 {
     public class BuildScript
     {
+        public static string AndroidSdkRoot
+        {
+            get { return EditorPrefs.GetString("AndroidSdkRoot"); }
+            set { EditorPrefs.SetString("AndroidSdkRoot", value); }
+        }
+
+        public static string JdkRoot
+        {
+            get { return EditorPrefs.GetString("JdkPath"); }
+            set { EditorPrefs.SetString("JdkPath", value); }
+        }
+
+        public static string AndroidNdkRoot
+        {
+            get { return EditorPrefs.GetString("AndroidNdkRoot"); }
+            set { EditorPrefs.SetString("AndroidNdkRoot", value); }
+        }
+
         static public string AssetBundleDirectory
         {
             get
@@ -36,8 +54,32 @@ namespace Elurnity.AssetBundles
             return outputPath;
         }
 
+        public static void CheckEnvironmentVariables()
+        {
+            var androidSDKEnv = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");
+            var androidNDKEnv = Environment.GetEnvironmentVariable("ANDROID_NDK");
+            var javaEnv = Environment.GetEnvironmentVariable("JAVA_HOME");
+
+            if (string.IsNullOrEmpty(androidSDKEnv))
+            {
+               AndroidSdkRoot = androidSDKEnv;
+            }
+
+            if (string.IsNullOrEmpty(androidNDKEnv))
+            {
+               AndroidNdkRoot = androidNDKEnv;
+            }
+
+            if (string.IsNullOrEmpty(javaEnv))
+            {
+               JdkRoot = javaEnv;
+            }
+        }
+
         public static void BuildAssetBundles(bool copyToStreammingAssets = false)
         {
+            CheckEnvironmentVariables();
+
             // Choose the output path according to the build target.
             string outputPath = CreateAssetBundleDirectory();
 
@@ -92,10 +134,12 @@ namespace Elurnity.AssetBundles
 
         public static void BuildPlayer(bool copyToStreammingAssets, string outputPath = null)
         {
+            CheckEnvironmentVariables();
+
             outputPath = outputPath ?? EditorUtility.SaveFolderPanel("Choose Location of the Built Game", "", "");
             if (outputPath.Length == 0)
                 return;
-            
+
             var target = EditorUserBuildSettings.activeBuildTarget;
 
             var options = BuildOptions.None | BuildOptions.AutoRunPlayer;
